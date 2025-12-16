@@ -1,9 +1,17 @@
 /* 导入98.css */
 @import '98.css';
 
+/* 自定义字体 */
+@font-face {
+    font-family: 'CustomFont';
+    src: url('/fonts.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* 全局样式 */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #008080;
     margin: 0;
     padding: 0;
@@ -27,6 +35,7 @@ body {
     z-index: 1000;
     color: black;
     display: none; /* 隐藏重复的开始按钮 */
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .start-button:active {
@@ -77,6 +86,7 @@ body {
     display: flex;
     align-items: center;
     color: black;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .start-menu-item:hover {
@@ -266,11 +276,16 @@ img.icon-content {
     border-bottom: none;
 }
 
+/* 分类标签 */
+.category-tab {
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 .taskbar-left, .taskbar-center, .taskbar-right {
     display: flex;
     align-items: center;
 }
-
+/* 任务栏按钮 */
 .taskbar-button {
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
@@ -278,17 +293,19 @@ img.icon-content {
     font-weight: bold;
     cursor: pointer;
     color: black;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .taskbar-button:active {
     border-style: inset;
 }
-
+/* 任务栏右侧 */
 .taskbar-right {
     font-size: 12px;
     padding: 3px 10px;
     border: 2px inset #c0c0c0;
     color: black;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* 对话框 */
@@ -317,13 +334,14 @@ img.icon-content {
     box-sizing: border-box;
     width: 100%;
 }
-
+/* 对话框标题 */
 .dialog-title {
     margin: 0;
     font-size: 14px;
     font-weight: bold;
     line-height: 1;
     padding: 0;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dialog-close-btn {
@@ -339,6 +357,7 @@ img.icon-content {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dialog-close-btn:active {
@@ -362,6 +381,7 @@ img.icon-content {
     margin-bottom: 5px;
     font-size: 14px;
     color: black;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .setting-group input, .setting-group select {
@@ -374,8 +394,8 @@ img.icon-content {
     height: 32px;
     font-size: 14px;
     line-height: 1;
-    /* 确保中文显示正常 */
-    font-family: 'Microsoft YaHei', 'SimSun', sans-serif;
+    /* 使用自定义字体 */
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     /* 确保在高分屏上显示正常 */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -400,6 +420,7 @@ img.icon-content {
     font-size: 14px;
     color: black;
     box-sizing: border-box;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dialog-btn:active {
@@ -420,6 +441,7 @@ img.icon-content {
     font-size: 14px;
     color: black;
     box-sizing: border-box;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .button:active {
@@ -450,6 +472,7 @@ img.icon-content {
     cursor: pointer;
     font-size: 14px;
     color: black;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .context-menu-item:hover {

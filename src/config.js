@@ -52,5 +52,12 @@ export const appConfig = {
     menu: {
         showContextMenu: true,       // 是否显示右键菜单
         showStartMenu: true          // 是否显示开始菜单
+    },
+    
+    // 字体配置
+    font: {
+        defaultFont: 'CustomFont',   // 默认字体名称
+        fallbackFonts: ['Segoe UI', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif'], // 后备字体列表
+        useCustomFont: true          // 是否使用自定义字体
     }
 };

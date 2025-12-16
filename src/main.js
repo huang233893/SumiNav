@@ -764,11 +764,23 @@ function fetchFavicon() {
 }
 
 // 响应式处理
+// 窗口大小变化事件处理
+let lastWindowHeight = window.innerHeight;
 window.addEventListener('resize', () => {
-    // 在窗口大小改变时调整布局
-    closeStartMenu();
-    closeAllDialogs();
-    closeContextMenu();
+    const currentHeight = window.innerHeight;
+    
+    // 检测是否是手机端输入法导致的窗口高度变化
+    // 当输入法弹出时，通常窗口高度会减少，而宽度不变
+    const isKeyboardShown = currentHeight < lastWindowHeight;
+    
+    // 仅在不是输入法导致的窗口变化时关闭菜单和对话框
+    if (!isKeyboardShown) {
+        closeStartMenu();
+        closeContextMenu();
+    }
+    
+    // 更新最后窗口高度
+    lastWindowHeight = currentHeight;
 });
 
 // 导出全局函数（用于调试）

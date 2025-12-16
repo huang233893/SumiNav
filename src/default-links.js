@@ -70,7 +70,7 @@ export const defaultLinks = [
         id: '8',
         name: '转换云',
         url: 'https://www.zhuanhuanyun.cn/',
-        icon: 'https://www.zhuanhuanyun.cn/static/project/zhy/web/static/picture/icon_1.png?v=1',
+        icon: 'https://www.zhuanhuanyun.cn/static/project/zhy/web/static/picture/icon_1.png',
         category: '工具',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

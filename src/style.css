@@ -121,12 +121,32 @@ body {
     align-content: start;
 }
 
+/* 当任务栏在顶部时，调整桌面区域的顶部内边距 */
+body:not(.mobile) .taskbar.top ~ .desktop {
+    padding-top: 80px;
+}
+
+/* 当任务栏在底部时，调整桌面区域的底部内边距 */
+body:not(.mobile) .taskbar.bottom ~ .desktop {
+    padding-bottom: 80px;
+}
+
 /* 列表视图模式 */
 .desktop.list-view {
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding: 50px 20px 50px 20px; /* 保持与网格视图相同的边距 */
+}
+
+/* 当任务栏在顶部时，调整列表视图桌面区域的顶部内边距 */
+body:not(.mobile) .taskbar.top ~ .desktop.list-view {
+    padding-top: 80px;
+}
+
+/* 当任务栏在底部时，调整列表视图桌面区域的底部内边距 */
+body:not(.mobile) .taskbar.bottom ~ .desktop.list-view {
+    padding-bottom: 80px;
 }
 
 .desktop.list-view .desktop-icon {
@@ -182,7 +202,9 @@ body {
 
 /* 桌面图标 */
 .desktop-icon {
-    width: 68px; /* 48px图标宽度 + 20px左右padding */
+    /* 调整为适合图标和标签的宽度 */
+    min-width: 80px;
+    width: auto;
     text-align: center;
     color: white;
     cursor: pointer;
@@ -207,7 +229,9 @@ body {
     width: 48px;
     height: 48px;
     margin: 0 auto 5px;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .icon-content {
@@ -227,7 +251,7 @@ img.icon-content {
 }
 
 .label-container {
-    width: 48px;
+    width: 100%;
     margin: 0 auto;
     display: block;
     text-align: center;
@@ -239,9 +263,12 @@ img.icon-content {
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+    max-width: 100%;
     background-color: transparent;
     padding: 0;
     border-radius: 0;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 /* 任务栏 */
@@ -258,6 +285,8 @@ img.icon-content {
     bottom: 0;
     left: 0;
     right: 0;
+    box-sizing: border-box; /* 确保边框宽度不会影响任务栏的实际尺寸 */
+    width: 100%; /* 明确设置宽度为100% */
 }
 
 /* 任务栏在顶部 */
@@ -532,6 +561,26 @@ img.icon-content {
         grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
         gap: 10px;
         padding: 10px;
+    }
+    
+    /* 手机端任务栏在顶部时的桌面内边距 */
+    .taskbar.top ~ .desktop {
+        padding-top: 40px;
+    }
+    
+    /* 手机端任务栏在底部时的桌面内边距 */
+    .taskbar.bottom ~ .desktop {
+        padding-bottom: 40px;
+    }
+    
+    /* 手机端列表视图任务栏在顶部时的桌面内边距 */
+    .taskbar.top ~ .desktop.list-view {
+        padding-top: 40px;
+    }
+    
+    /* 手机端列表视图任务栏在底部时的桌面内边距 */
+    .taskbar.bottom ~ .desktop.list-view {
+        padding-bottom: 40px;
     }
     
     .icon-image {

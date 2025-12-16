@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重置设置</title>
+</head>
+<body>
+    <h1>重置设置</h1>
+    <button onclick="resetSettings()">重置主题为浅色</button>
+    
+    <script>
+        function resetSettings() {
+            localStorage.setItem('suminav-settings', JSON.stringify({
+                wallpaper: 'default',
+                theme: 'light'
+            }));
+            alert('设置已重置！请关闭此页面并刷新主页面。');
+        }
+    </script>
+</body>
+</html>

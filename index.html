@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酥米的个人导航页</title>
+    <meta name="description" content="酥米的个人导航页，宝藏网站的聚集地">
+    <meta name="keywords" content="导航页,个人导航页,宝藏网站,聚集地">
+    <meta name="author" content="酥米">
+    <meta name="robots" content="index, follow">
+    <meta name="revisit-after" content="7 days">
+    <meta name="rating" content="general">
+    
+    <!-- Open Graph 标签 -->
+    <meta property="og:title" content="酥米的个人导航页">
+    <meta property="og:description" content="酥米的个人导航页，宝藏网站的聚集地">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://my.sumi233.top">
+    <meta property="og:image" content="https://my.sumi233.top/favicon.ico">
+    <meta property="og:site_name" content="SumiNav">
+    
+    <!-- Twitter 卡片标签 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="酥米的个人导航页">
+    <meta name="twitter:description" content="酥米的个人导航页，宝藏网站的聚集地">
+    <meta name="twitter:image" content="https://my.sumi233.top/favicon.ico">
+    
+    <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+    <!-- 开始菜单按钮 -->
+    <button id="start-button" class="start-button">🪟开始</button>
+    
+    <!-- 开始菜单 -->
+    <div id="start-menu" class="start-menu hidden">
+        <div class="start-menu-header">
+            <img src="/favicon.ico">
+            <span>SumiNav</span>
+        </div>
+        <div class="start-menu-items">
+            <button id="add-link-btn" class="start-menu-item">
+                <span class="item-icon">📂</span>
+                <span>添加链接</span>
+            </button>
+            <button id="toggle-view-btn" class="start-menu-item">
+                <span class="item-icon">🔄</span>
+                <span>切换视图</span>
+            </button>
+
+            <button id="settings-btn" class="start-menu-item">
+                <span class="item-icon">⚙️</span>
+                <span>设置</span>
+            </button>
+            <button id="help-btn" class="start-menu-item">
+                <span class="item-icon">❓</span>
+                <span>帮助</span>
+            </button>
+            <button id="about-btn" class="start-menu-item">
+                <span class="item-icon">ℹ️</span>
+                <span>关于</span>
+            </button>
+            <button id="reset-btn" class="start-menu-item">
+                <span class="item-icon">🔄</span>
+                <span>重置设置</span>
+            </button>
+        </div>
+        <div class="start-menu-footer">
+            <span id="current-time">12:00</span>
+        </div>
+    </div>
+    
+    <!-- 桌面 -->
+    <div id="desktop" class="desktop">
+        <!-- 桌面图标将通过JavaScript动态生成 -->
+    </div>
+    
+    <!-- 任务栏 -->
+    <div id="taskbar" class="taskbar">
+        <div class="taskbar-left">
+            <button id="taskbar-start" class="taskbar-button">🪟开始</button>
+        </div>
+        <div class="taskbar-center">
+            <!-- 任务将通过JavaScript动态生成 -->
+            <button id="github-project-btn" class="taskbar-button">此主题的Github项目</button>
+        </div>
+        <div class="taskbar-right">
+            <span id="taskbar-time">运行时间</span>
+        </div>
+    </div>
+    
+    <!-- 添加链接对话框 -->
+    <div id="add-link-dialog" class="dialog hidden">
+        <div class="dialog-header">
+            <span class="dialog-title">添加新链接</span>
+            <button id="close-dialog" class="dialog-close-btn">×</button>
+        </div>
+        <div class="dialog-content">
+            <div class="form-group">
+                <label for="link-name">名称:</label>
+                <input type="text" id="link-name" placeholder="输入链接名称" required>
+            </div>
+            <div class="form-group">
+                <label for="link-url">URL:</label>
+                <input type="url" id="link-url" placeholder="https://example.com" required>
+            </div>
+            <div class="form-group">
+                <label for="link-icon">图标:</label>
+                <input type="text" id="link-icon" placeholder="📂" value="📂">
+            </div>
+            <div class="form-group">
+                <label for="link-category">分类:</label>
+                <select id="link-category">
+                    <option value="常用">常用</option>
+                    <option value="工作">工作</option>
+                    <option value="学习">学习</option>
+                    <option value="娱乐">娱乐</option>
+                </select>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button id="cancel-btn" class="button">取消</button>
+            <button id="save-btn" class="button primary">保存</button>
+        </div>
+    </div>
+    
+    <!-- 设置对话框 -->
+    <div id="settings-dialog" class="dialog hidden">
+        <div class="dialog-header">
+            <span class="dialog-title">设置</span>
+            <button id="close-settings-btn" class="dialog-close-btn">×</button>
+        </div>
+        <div class="dialog-content">
+            <div class="setting-group">
+                <label for="wallpaper-select">桌面壁纸:</label>
+                <select id="wallpaper-select">
+                    <option value="default">默认</option>
+                    <option value="green">绿色</option>
+                    <option value="blue">蓝色</option>
+                    <option value="custom">自定义</option>
+                </select>
+            </div>
+
+            <div class="setting-group" id="custom-wallpaper-group" style="display: none;">
+                <label for="custom-wallpaper">自定义壁纸URL:</label>
+                <input type="text" id="custom-wallpaper" placeholder="输入壁纸URL">
+            </div>
+
+            <div class="setting-group">
+                <label for="taskbar-position">任务栏位置:</label>
+                <select id="taskbar-position">
+                    <option value="bottom">底部</option>
+                    <option value="top">顶部</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button id="cancel-settings-btn" class="dialog-btn">取消</button>
+            <button id="save-settings-btn" class="dialog-btn primary">保存</button>
+        </div>
+    </div>
+    
+
+    
+    <!-- 帮助对话框 -->
+    <div id="help-dialog" class="dialog hidden">
+        <div class="dialog-header">
+            <span class="dialog-title">帮助</span>
+            <button id="close-help" class="dialog-close-btn">×</button>
+        </div>
+        <div class="dialog-content">
+            <p>SumiNav使用说明:</p>
+            <ul>
+                <li>点击「开始」按钮添加新链接</li>
+                <li>拖拽图标可以重新排列</li>
+                <li>右键点击图标可以编辑或删除</li>
+                <li>所有设置将保存在本地</li>
+            </ul>
+        </div>
+        <div class="dialog-footer">
+            <button id="close-help-btn" class="button primary">确定</button>
+        </div>
+    </div>
+
+    <!-- 关于对话框 -->
+    <div id="about-dialog" class="dialog hidden">
+        <div class="dialog-header">
+            <span class="dialog-title">关于 SumiNav</span>
+            <button id="close-about" class="dialog-close-btn">×</button>
+        </div>
+        <div class="dialog-content">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="/favicon.ico" alt="SumiNav Logo" style="width: 64px; height: 64px;">
+                <h2>SumiNav</h2>
+            </div>
+            <p>版本: 1.0.0</p>
+            <p>Windows 98风格的导航页应用</p>
+            <p>© 2025 Supermini233. 保留所有权利。</p>
+            <p>设计灵感来源于经典的Windows 98界面风格，使用了98.css样式，初期版本bug还很多</p>
+        </div>
+        <div class="dialog-footer">
+            <button id="close-about-btn" class="button primary">确定</button>
+        </div>
+    </div>
+    
+    <!-- 右键菜单 -->
+    <div id="context-menu" class="context-menu hidden">
+        <button id="edit-link" class="context-menu-item">编辑</button>
+        <button id="delete-link" class="context-menu-item">删除</button>
+    </div>
+    
+    <!-- 遮罩层 -->
+    <div id="overlay" class="overlay hidden"></div>
+    
+    <!-- JavaScript -->
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

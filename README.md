@@ -56,12 +56,12 @@ npm run dev
 
 ```
 SumiNav/
-├── dist/                  # 构建输出目录
 ├── public/                # 静态资源目录
 │   └── favicon.ico        # 网站图标
 ├── src/                   # 源代码目录
 │   ├── config.js          # 全局配置文件
 │   ├── default-links.js   # 默认链接数据
+│   ├── windowConfig.js    # 窗口配置文件
 │   ├── main.js            # 主要JavaScript逻辑
 │   └── style.css          # 样式文件
 ├── index.html             # 主HTML文件

@@ -306,13 +306,43 @@ img.icon-content {
 }
 
 /* 分类标签 */
+.category-tabs {
+    display: none; /* 默认隐藏分类标签 */
+    gap: 5px;
+    overflow-x: auto;
+    padding: 5px;
+    margin: 0 10px;
+    flex-wrap: nowrap;
+    flex: 1;
+    justify-content: center;
+}
+
 .category-tab {
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    padding: 3px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: black;
     font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    white-space: nowrap;
+}
+
+.category-tab.active {
+    border-style: inset;
+    background-color: #808080;
+    color: white;
 }
 
 .taskbar-left, .taskbar-center, .taskbar-right {
     display: flex;
     align-items: center;
+}
+
+.taskbar-center {
+    flex: 1;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 /* 任务栏按钮 */
 .taskbar-button {
@@ -525,7 +555,79 @@ img.icon-content {
     display: none !important;
 }
 
+/* 分类菜单样式 */
+.category-menu-container {
+    position: relative;
+    display: block;
+    margin: 0 5px;
+}
+
+.category-menu-btn {
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    padding: 3px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: black;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    white-space: nowrap;
+}
+
+.category-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    min-width: 150px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* 当任务栏在顶部时，将分类菜单显示在按钮下方 */
+.taskbar.top .category-menu-container .category-dropdown {
+    bottom: auto;
+    top: 100%;
+}
+
+.category-dropdown-item {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: black;
+    font-family: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 12px;
+}
+
+.category-dropdown-item:hover {
+    background: #000080;
+    color: white;
+}
+
+.category-dropdown-item.active {
+    background: #808080;
+    color: white;
+}
+
 /* 响应式设计 */
+@media (min-width: 901px) {
+    /* 仅在大屏幕上显示分类标签，隐藏菜单按钮 */
+    .category-tabs {
+        display: flex;
+    }
+    
+    .category-menu-container {
+        display: none;
+    }
+}
+
 @media (max-width: 768px) {
     .desktop {
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));

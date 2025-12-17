@@ -1,8 +1,55 @@
 // SumiNav - Windows 98风格导航页
 
-// 导入默认链接配置和应用配置
+// 导入默认链接配置、应用配置和窗口配置
 import { defaultLinks } from './default-links.js';
 import { appConfig } from './config.js';
+import { windowConfig } from './windowConfig.js';
+
+// 生成SEO标签函数
+function generateSEOMetaTags() {
+    const { seo } = appConfig;
+    const head = document.head;
+    
+    // 设置页面标题
+    document.title = seo.title;
+    
+    // 移除已存在的SEO相关meta标签，避免重复
+    const existingMetaTags = head.querySelectorAll('[name^="twitter:"]');
+    const existingOGTags = head.querySelectorAll('[property^="og:"]');
+    const existingBasicMeta = head.querySelectorAll('[name="description"],[name="keywords"],[name="author"],[name="robots"],[name="revisit-after"],[name="rating"]');
+    
+    existingMetaTags.forEach(tag => tag.remove());
+    existingOGTags.forEach(tag => tag.remove());
+    existingBasicMeta.forEach(tag => tag.remove());
+    
+    // 生成基本SEO meta标签
+    for (const [name, content] of Object.entries(seo.meta)) {
+        // 将camelCase转换为kebab-case（用于revisitAfter → revisit-after）
+        const metaName = name.replace(/([A-Z])/g, '-$1').toLowerCase();
+        const metaTag = document.createElement('meta');
+        metaTag.name = metaName;
+        metaTag.content = content;
+        head.appendChild(metaTag);
+    }
+    
+    // 生成Open Graph标签
+    for (const [property, content] of Object.entries(seo.openGraph)) {
+        // 将camelCase转换为snake_case（用于siteName → site_name）
+        const ogProperty = property.replace(/([A-Z])/g, '_$1').toLowerCase();
+        const ogTag = document.createElement('meta');
+        ogTag.property = `og:${ogProperty}`;
+        ogTag.content = content;
+        head.appendChild(ogTag);
+    }
+    
+    // 生成Twitter卡片标签
+    for (const [name, content] of Object.entries(seo.twitter)) {
+        const twitterTag = document.createElement('meta');
+        twitterTag.name = `twitter:${name}`;
+        twitterTag.content = content;
+        head.appendChild(twitterTag);
+    }
+}
 
 // 全局变量
 let links = [];
@@ -10,6 +57,7 @@ let currentEditingLink = null;
 let draggedElement = null;
 let currentViewMode = 'grid'; // 'grid' 或 'list'
 let activeCategory = '全部'; // 当前选中的分类
+let isMoveIconMode = false; // 移动图标模式标志位
 
 // 初始化应用
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,12 +65,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
+    // 生成SEO标签
+    generateSEOMetaTags();
+    
     // 加载本地存储的数据
     loadLinks();
     const settings = loadSettings();
     
     // 应用设置
     applySettings(settings);
+    
+    // 初始化窗口内容
+    initializeWindows();
+    
+    // 生成开始菜单
+    generateStartMenu();
     
     // 设置事件监听器
     setupEventListeners();
@@ -36,85 +93,197 @@ function initializeApp() {
     renderDesktopIcons();
 }
 
+// 初始化窗口内容函数
+function initializeWindows() {
+    // 初始化开始菜单
+    const startMenu = document.getElementById('start-menu');
+    if (startMenu) {
+        startMenu.innerHTML = windowConfig.startMenu.html;
+    }
+
+    // 初始化任务栏
+    const taskbar = document.getElementById('taskbar');
+    if (taskbar) {
+        taskbar.innerHTML = windowConfig.taskbar.html;
+    }
+
+    // 初始化添加链接对话框
+    const addLinkDialog = document.getElementById('add-link-dialog');
+    if (addLinkDialog) {
+        addLinkDialog.innerHTML = windowConfig.addLinkDialog.html;
+    }
+
+    // 初始化设置对话框
+    const settingsDialog = document.getElementById('settings-dialog');
+    if (settingsDialog) {
+        settingsDialog.innerHTML = windowConfig.settingsDialog.html;
+    }
+
+    // 初始化帮助对话框
+    const helpDialog = document.getElementById('help-dialog');
+    if (helpDialog) {
+        helpDialog.innerHTML = windowConfig.helpDialog.html;
+    }
+
+    // 初始化关于对话框
+    const aboutDialog = document.getElementById('about-dialog');
+    if (aboutDialog) {
+        aboutDialog.innerHTML = windowConfig.aboutDialog.html;
+    }
+
+    // 初始化右键菜单
+    const contextMenu = document.getElementById('context-menu');
+    if (contextMenu) {
+        contextMenu.innerHTML = windowConfig.contextMenu.html;
+    }
+
+    // 初始化遮罩层（如果需要）
+    const overlay = document.getElementById('overlay');
+    if (overlay) {
+        overlay.innerHTML = windowConfig.overlay.html;
+    }
+}
+
 // 设置事件监听器
 function setupEventListeners() {
     // 开始菜单
-    document.getElementById('start-button').addEventListener('click', toggleStartMenu);
-    document.getElementById('taskbar-start').addEventListener('click', toggleStartMenu);
+    const startButton = document.getElementById('start-button');
+    const taskbarStart = document.getElementById('taskbar-start');
+    if (startButton) {
+        startButton.addEventListener('click', toggleStartMenu);
+        startButton.textContent = appConfig.menu.startMenu.buttonText;
+    }
+    if (taskbarStart) {
+        taskbarStart.addEventListener('click', toggleStartMenu);
+        taskbarStart.textContent = appConfig.menu.startMenu.buttonText;
+    }
     
     // GitHub项目按钮
-    document.getElementById('github-project-btn').addEventListener('click', () => {
-        window.open(appConfig.githubProjectUrl, '_blank');
+    const githubButton = document.getElementById('github-project-btn');
+    if (githubButton) {
+        githubButton.addEventListener('click', () => {
+            window.open(appConfig.githubProjectUrl, '_blank');
+        });
+    }
+    
+    // 分类菜单按钮
+    const categoryMenuBtn = document.getElementById('category-menu-btn');
+    if (categoryMenuBtn) {
+        categoryMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // 防止点击菜单时关闭菜单
+            toggleCategoryDropdown();
+        });
+    }
+    
+    // 点击其他地方关闭分类菜单
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.category-menu-container')) {
+            closeCategoryDropdown();
+        }
     });
     
-    // 开始菜单项
-    document.getElementById('add-link-btn').addEventListener('click', () => {
-        closeStartMenu();
-        currentEditingLink = null;
-        openAddLinkDialog();
-    });
-    
-    document.getElementById('toggle-view-btn').addEventListener('click', () => {
-        closeStartMenu();
-        toggleViewMode();
-    });
-    
-    
-    document.getElementById('settings-btn').addEventListener('click', () => {
-        closeStartMenu();
-        openSettingsDialog();
-    });
-    
-    document.getElementById('help-btn').addEventListener('click', () => {
-        closeStartMenu();
-        openHelpDialog();
-    });
-    
-    document.getElementById('about-btn').addEventListener('click', () => {
-        closeStartMenu();
-        openAboutDialog();
-    });
-    
-    document.getElementById('reset-btn').addEventListener('click', () => {
-        closeStartMenu();
-        resetApp();
-    });
+    // 开始菜单项事件委托
+    const startMenuItems = document.querySelector('.start-menu-items');
+    if (startMenuItems) {
+        startMenuItems.addEventListener('click', (e) => {
+            const menuItem = e.target.closest('.start-menu-item');
+            if (!menuItem) return;
+            
+            const action = menuItem.dataset.action;
+            closeStartMenu();
+            
+            switch (action) {
+                case 'addLink':
+                    currentEditingLink = null;
+                    openAddLinkDialog();
+                    break;
+                case 'toggleView':
+                    toggleViewMode();
+                    break;
+                case 'moveIcon':
+                    // 进入/退出移动图标模式的逻辑
+                    isMoveIconMode = !isMoveIconMode;
+                    const desktop = document.getElementById('desktop');
+                    if (desktop) {
+                        if (isMoveIconMode) {
+                            desktop.classList.add('move-icon-mode');
+                            alert('已进入图标移动模式，长按并拖动图标即可调整位置\n再次点击移动图标位置可退出此模式');
+                        } else {
+                            desktop.classList.remove('move-icon-mode');
+                            alert('已退出图标移动模式');
+                        }
+                    }
+                    break;
+                case 'settings':
+                    openSettingsDialog();
+                    break;
+                case 'help':
+                    openHelpDialog();
+                    break;
+                case 'about':
+                    openAboutDialog();
+                    break;
+                case 'reset':
+                    resetApp();
+                    break;
+            }
+        });
+    }
     
     // 壁纸选择事件监听器
-    document.getElementById('wallpaper-select').addEventListener('change', function() {
-        const customWallpaperGroup = document.getElementById('custom-wallpaper-group');
-        customWallpaperGroup.style.display = this.value === 'custom' ? 'block' : 'none';
-    });
+    const wallpaperSelect = document.getElementById('wallpaper-select');
+    if (wallpaperSelect) {
+        wallpaperSelect.addEventListener('change', function() {
+            const customWallpaperGroup = document.getElementById('custom-wallpaper-group');
+            if (customWallpaperGroup) {
+                customWallpaperGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+            }
+        });
+    }
     
     // 对话框关闭
-    document.getElementById('close-dialog').addEventListener('click', closeAddLinkDialog);
-    document.getElementById('cancel-btn').addEventListener('click', closeAddLinkDialog);
+    const closeDialogBtn = document.getElementById('close-dialog');
+    const cancelBtn = document.getElementById('cancel-btn');
+    if (closeDialogBtn) closeDialogBtn.addEventListener('click', closeAddLinkDialog);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeAddLinkDialog);
     
     // URL输入框事件监听，自动获取图标
-    document.getElementById('link-url').addEventListener('blur', fetchFavicon);
-    document.getElementById('link-url').addEventListener('change', fetchFavicon);
+    const linkUrlInput = document.getElementById('link-url');
+    if (linkUrlInput) {
+        linkUrlInput.addEventListener('blur', fetchFavicon);
+        linkUrlInput.addEventListener('change', fetchFavicon);
+    }
     
-    document.getElementById('close-settings-btn').addEventListener('click', closeSettingsDialog);
-    document.getElementById('cancel-settings-btn').addEventListener('click', closeSettingsDialog);
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+    if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettingsDialog);
+    if (cancelSettingsBtn) cancelSettingsBtn.addEventListener('click', closeSettingsDialog);
     
-    document.getElementById('close-help').addEventListener('click', closeHelpDialog);
-    document.getElementById('close-help-btn').addEventListener('click', closeHelpDialog);
+    const closeHelpBtn = document.getElementById('close-help');
+    const closeHelpDialogBtn = document.getElementById('close-help-btn');
+    if (closeHelpBtn) closeHelpBtn.addEventListener('click', closeHelpDialog);
+    if (closeHelpDialogBtn) closeHelpDialogBtn.addEventListener('click', closeHelpDialog);
     
-    document.getElementById('close-about').addEventListener('click', closeAboutDialog);
-    document.getElementById('close-about-btn').addEventListener('click', closeAboutDialog);
-    
-
+    const closeAboutBtn = document.getElementById('close-about');
+    const closeAboutDialogBtn = document.getElementById('close-about-btn');
+    if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAboutDialog);
+    if (closeAboutDialogBtn) closeAboutDialogBtn.addEventListener('click', closeAboutDialog);
     
     // 保存按钮
-    document.getElementById('save-btn').addEventListener('click', saveLink);
-    document.getElementById('save-settings-btn').addEventListener('click', saveSettings);
+    const saveBtn = document.getElementById('save-btn');
+    const saveSettingsBtn = document.getElementById('save-settings-btn');
+    if (saveBtn) saveBtn.addEventListener('click', saveLink);
+    if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', saveSettings);
     
     // 遮罩层点击关闭对话框
-    document.getElementById('overlay').addEventListener('click', () => {
-        closeAllDialogs();
-        closeStartMenu();
-        closeContextMenu();
-    });
+    const overlay = document.getElementById('overlay');
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            closeAllDialogs();
+            closeStartMenu();
+            closeContextMenu();
+        });
+    }
     
     // 右键菜单
     document.addEventListener('contextmenu', (e) => {
@@ -125,8 +294,10 @@ function setupEventListeners() {
     });
     
     // 右键菜单项
-    document.getElementById('edit-link').addEventListener('click', editLink);
-    document.getElementById('delete-link').addEventListener('click', deleteLink);
+    const editLinkBtn = document.getElementById('edit-link');
+    const deleteLinkBtn = document.getElementById('delete-link');
+    if (editLinkBtn) editLinkBtn.addEventListener('click', editLink);
+    if (deleteLinkBtn) deleteLinkBtn.addEventListener('click', deleteLink);
     
     // 点击空白处关闭右键菜单
     document.addEventListener('click', (e) => {
@@ -145,6 +316,65 @@ function setupEventListeners() {
     });
 }
 
+function generateStartMenu() {
+    const startMenuItems = document.querySelector('.start-menu-items');
+    if (!startMenuItems) return;
+    
+    // 清空现有菜单项
+    startMenuItems.innerHTML = '';
+    
+    // 获取当前设备类型（更精确的移动端判断）
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = window.innerWidth <= 900 && 
+                    (userAgent.includes('mobile') || 
+                     userAgent.includes('android') || 
+                     userAgent.includes('iphone') || 
+                     userAgent.includes('ipad'));
+    
+    // 根据配置生成菜单项
+    appConfig.menu.startMenu.items.forEach(item => {
+        // 过滤移动图标选项（仅移动端显示）
+        if (item.id === 'move-icon' && !isMobile) return;
+        
+        const button = document.createElement('button');
+        button.id = `${item.id}-btn`;
+        button.className = 'start-menu-item';
+        
+        button.innerHTML = `
+            <span class="item-icon">${item.icon}</span>
+            <span>${item.text}</span>
+        `;
+        
+        // 存储动作类型
+        button.dataset.action = item.action;
+        
+        startMenuItems.appendChild(button);
+    });
+}
+
+// 动态生成分类选项
+function generateCategoryOptions() {
+    const categorySelect = document.getElementById('link-category');
+    if (!categorySelect) return;
+    
+    // 清空现有选项
+    categorySelect.innerHTML = '';
+    
+    // 获取所有分类（从配置文件获取基础分类，然后合并链接中的分类）
+    const linkCategories = [...new Set(links.map(link => link.category))];
+    const configCategories = appConfig.links.categories || [];
+    // 合并分类并去重，保持配置文件中的顺序
+    const categories = [...new Set([...configCategories, ...linkCategories])];
+    
+    // 为每个分类创建选项
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+    });
+}
+
 function closeStartMenu() {
     document.getElementById('start-menu').classList.add('hidden');
 }
@@ -154,25 +384,35 @@ function openAddLinkDialog() {
     const dialog = document.getElementById('add-link-dialog');
     const overlay = document.getElementById('overlay');
     
+    if (!dialog || !overlay) return;
+    
+    // 动态生成分类选项
+    generateCategoryOptions();
+    
     // 清空或填充表单
+    const linkNameInput = document.getElementById('link-name');
+    const linkUrlInput = document.getElementById('link-url');
+    const linkIconInput = document.getElementById('link-icon');
+    const linkCategorySelect = document.getElementById('link-category');
+    
     if (currentEditingLink) {
-        document.getElementById('link-name').value = currentEditingLink.name;
-        document.getElementById('link-url').value = currentEditingLink.url;
-        document.getElementById('link-icon').value = currentEditingLink.icon;
-        document.getElementById('link-category').value = currentEditingLink.category;
+        if (linkNameInput) linkNameInput.value = currentEditingLink.name;
+        if (linkUrlInput) linkUrlInput.value = currentEditingLink.url;
+        if (linkIconInput) linkIconInput.value = currentEditingLink.icon;
+        if (linkCategorySelect) linkCategorySelect.value = currentEditingLink.category;
     } else {
         // 直接重置各个输入字段，因为对话框中没有form标签
-        document.getElementById('link-name').value = '';
-        document.getElementById('link-url').value = '';
-        document.getElementById('link-icon').value = appConfig.links.defaultIcon;
-        document.getElementById('link-category').value = appConfig.links.defaultCategory;
+        if (linkNameInput) linkNameInput.value = '';
+        if (linkUrlInput) linkUrlInput.value = '';
+        if (linkIconInput) linkIconInput.value = appConfig.links.defaultIcon;
+        if (linkCategorySelect) linkCategorySelect.value = appConfig.links.defaultCategory;
     }
     
     dialog.classList.remove('hidden');
     overlay.classList.remove('hidden');
     
     // 聚焦到第一个输入框
-    document.getElementById('link-name').focus();
+    if (linkNameInput) linkNameInput.focus();
 }
 
 function closeAddLinkDialog() {
@@ -250,39 +490,49 @@ function showContextMenu(event) {
     const contextMenu = document.getElementById('context-menu');
     const desktopIcon = event.target.closest('.desktop-icon');
     
-    if (desktopIcon) {
-        // 保存当前选中的链接ID
-        window.currentLinkId = desktopIcon.dataset.id;
-        
-        // 计算菜单位置
-        let x = event.clientX;
-        let y = event.clientY;
-        
-        // 确保菜单不会超出屏幕
-        if (x + contextMenu.offsetWidth > window.innerWidth) {
-            x = window.innerWidth - contextMenu.offsetWidth;
-        }
-        if (y + contextMenu.offsetHeight > window.innerHeight) {
-            y = window.innerHeight - contextMenu.offsetHeight;
-        }
-        
-        contextMenu.style.left = `${x}px`;
-        contextMenu.style.top = `${y}px`;
-        contextMenu.classList.remove('hidden');
+    if (!contextMenu || !desktopIcon) return;
+    
+    // 保存当前选中的链接ID
+    window.currentLinkId = desktopIcon.dataset.id;
+    
+    // 计算菜单位置
+    let x = event.clientX;
+    let y = event.clientY;
+    
+    // 确保菜单不会超出屏幕
+    if (x + contextMenu.offsetWidth > window.innerWidth) {
+        x = window.innerWidth - contextMenu.offsetWidth;
     }
+    if (y + contextMenu.offsetHeight > window.innerHeight) {
+        y = window.innerHeight - contextMenu.offsetHeight;
+    }
+    
+    contextMenu.style.left = `${x}px`;
+    contextMenu.style.top = `${y}px`;
+    contextMenu.classList.remove('hidden');
 }
 
 function closeContextMenu() {
-    document.getElementById('context-menu').classList.add('hidden');
+    const contextMenu = document.getElementById('context-menu');
+    if (contextMenu) {
+        contextMenu.classList.add('hidden');
+    }
     window.currentLinkId = null;
 }
 
 // 链接管理功能
 function saveLink() {
-    const name = document.getElementById('link-name').value.trim();
-    const url = document.getElementById('link-url').value.trim();
-    const icon = document.getElementById('link-icon').value.trim() || '📂';
-    const category = document.getElementById('link-category').value;
+    const linkNameInput = document.getElementById('link-name');
+    const linkUrlInput = document.getElementById('link-url');
+    const linkIconInput = document.getElementById('link-icon');
+    const linkCategorySelect = document.getElementById('link-category');
+    
+    if (!linkNameInput || !linkUrlInput || !linkIconInput || !linkCategorySelect) return;
+    
+    const name = linkNameInput.value.trim();
+    const url = linkUrlInput.value.trim();
+    const icon = linkIconInput.value.trim() || '📂';
+    const category = linkCategorySelect.value;
     
     if (!name || !url) {
         alert('请填写名称和URL');
@@ -378,15 +628,63 @@ function renderCategoryTabs() {
         tab.addEventListener('click', () => {
             activeCategory = category;
             renderCategoryTabs();
+            renderCategoryDropdown();
             renderDesktopIcons();
         });
         categoryTabsContainer.appendChild(tab);
+    });
+    
+    // 同时更新分类菜单
+    renderCategoryDropdown();
+}
+
+// 分类菜单功能
+function toggleCategoryDropdown() {
+    const dropdown = document.getElementById('category-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
+    }
+}
+
+function closeCategoryDropdown() {
+    const dropdown = document.getElementById('category-dropdown');
+    if (dropdown) {
+        dropdown.classList.add('hidden');
+    }
+}
+
+function renderCategoryDropdown() {
+    const dropdown = document.getElementById('category-dropdown');
+    if (!dropdown) return;
+    
+    dropdown.innerHTML = '';
+    
+    // 获取所有分类（从配置文件获取基础分类，然后合并链接中的分类）
+    const linkCategories = [...new Set(links.map(link => link.category))];
+    const configCategories = appConfig.links.categories || [];
+    // 合并分类并去重，保持配置文件中的顺序
+    const categories = ['全部', ...new Set([...configCategories, ...linkCategories])];
+    
+    categories.forEach(category => {
+        const item = document.createElement('button');
+        item.className = `category-dropdown-item ${category === activeCategory ? 'active' : ''}`;
+        item.textContent = category;
+        item.addEventListener('click', () => {
+            activeCategory = category;
+            renderCategoryTabs();
+            renderCategoryDropdown();
+            renderDesktopIcons();
+            closeCategoryDropdown();
+        });
+        dropdown.appendChild(item);
     });
 }
 
 // 渲染桌面图标
 function renderDesktopIcons() {
     const desktop = document.getElementById('desktop');
+    if (!desktop) return;
+    
     desktop.innerHTML = '';
     
     // 应用当前视图模式
@@ -431,28 +729,32 @@ function createDesktopIcon(link) {
     let longPressTimer;
     let touchStartX;
     let touchStartY;
+    let isLongPress = false; // 长按标志位
     
     // 触摸开始
     iconDiv.addEventListener('touchstart', (e) => {
         e.preventDefault(); // 防止滚动
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
+        isLongPress = false;
         
         // 设置长按定时器
         longPressTimer = setTimeout(() => {
-            draggedElement = iconDiv;
-            iconDiv.classList.add('dragging');
-        }, appConfig.desktop.longPressDuration); // 长按触发时间
+            // 长按显示右键菜单
+            isLongPress = true;
+            const event = new MouseEvent('contextmenu', {
+                clientX: touchStartX,
+                clientY: touchStartY,
+                bubbles: true,
+                cancelable: true
+            });
+            iconDiv.dispatchEvent(event);
+        }, 800); // 长按触发时间（800ms）
     });
     
     // 触摸移动
     iconDiv.addEventListener('touchmove', (e) => {
         e.preventDefault();
-        
-        // 如果正在拖动
-        if (draggedElement) {
-            // 这里可以添加视觉反馈，但实际位置由drop事件处理
-        }
         
         // 移动距离超过阈值，取消长按
         const touchX = e.touches[0].clientX;
@@ -462,7 +764,7 @@ function createDesktopIcon(link) {
             Math.pow(touchY - touchStartY, 2)
         );
         
-        if (distance > appConfig.desktop.dragThreshold && longPressTimer) {
+        if (distance > 10 && longPressTimer) { // 10px的阈值
             clearTimeout(longPressTimer);
             longPressTimer = null;
         }
@@ -478,19 +780,20 @@ function createDesktopIcon(link) {
             longPressTimer = null;
             
             // 短按打开链接
-            window.open(link.url, '_blank');
-        }
-        
-        // 结束拖动
-        if (draggedElement) {
-            iconDiv.classList.remove('dragging');
-            draggedElement = null;
+            if (!isLongPress) {
+                window.open(link.url, '_blank');
+            }
         }
     });
     
     // 点击打开链接
-    iconDiv.addEventListener('click', () => {
-        window.open(link.url, '_blank');
+    iconDiv.addEventListener('click', (e) => {
+        // 如果是长按触发的，不打开链接
+        if (!isLongPress) {
+            window.open(link.url, '_blank');
+        }
+        // 重置长按标志
+        isLongPress = false;
     });
     
     // 图标内容
@@ -636,6 +939,8 @@ function toggleStartMenu() {
     const startMenu = document.getElementById('start-menu');
     const taskbar = document.getElementById('taskbar');
     
+    if (!startMenu || !taskbar) return;
+    
     if (startMenu.classList.contains('hidden')) {
         startMenu.classList.remove('hidden');
         
@@ -677,8 +982,15 @@ function updateTime() {
     const timeString = `${diffHours.toString().padStart(2, '0')}:${diffMinutes.toString().padStart(2, '0')}:${diffSeconds.toString().padStart(2, '0')}`;
     
     // 更新显示
-    document.getElementById('current-time').textContent = `运行时间 ${timeString}`;
-    document.getElementById('taskbar-time').textContent = timeString;
+    const currentTimeElement = document.getElementById('current-time');
+    const taskbarTimeElement = document.getElementById('taskbar-time');
+    
+    if (currentTimeElement) {
+        currentTimeElement.textContent = `运行时间 ${timeString}`;
+    }
+    if (taskbarTimeElement) {
+        taskbarTimeElement.textContent = timeString;
+    }
 }
 
 // 本地存储功能
@@ -703,13 +1015,19 @@ function loadSettings() {
         const settings = JSON.parse(savedSettings);
         
         // 更新设置对话框的值
-        document.getElementById('wallpaper-select').value = settings.wallpaper || 'default';
-        document.getElementById('taskbar-position').value = settings.taskbarPosition || 'bottom';
+        const wallpaperSelect = document.getElementById('wallpaper-select');
+        if (wallpaperSelect) wallpaperSelect.value = settings.wallpaper || 'default';
+        
+        const taskbarPositionSelect = document.getElementById('taskbar-position');
+        if (taskbarPositionSelect) taskbarPositionSelect.value = settings.taskbarPosition || 'bottom';
         
         // 更新自定义壁纸输入框
         if (settings.wallpaper === 'custom') {
-            document.getElementById('custom-wallpaper-group').style.display = 'block';
-            document.getElementById('custom-wallpaper').value = settings.customWallpaper || '';
+            const customWallpaperGroup = document.getElementById('custom-wallpaper-group');
+            if (customWallpaperGroup) customWallpaperGroup.style.display = 'block';
+            
+            const customWallpaperInput = document.getElementById('custom-wallpaper');
+            if (customWallpaperInput) customWallpaperInput.value = settings.customWallpaper || '';
         }
         
         return settings;
